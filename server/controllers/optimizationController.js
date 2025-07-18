@@ -51,3 +51,14 @@ exports.optimizeRoute = async (req, res) => {
         res.status(500).send('OSRM or optimization error');
     }
 };
+
+exports.snapToRoad = async (req, res) => {
+    const { lat, lng } = req.body;
+    try {
+        const url = `http://router.project-osrm.org/nearest/v1/driving/${lng},${lat}`;
+        const response = await axios.get(url);
+        res.json(response.data);
+    } catch (error) {
+        res.status(500).send('OSRM nearest service failed');
+    }
+};
