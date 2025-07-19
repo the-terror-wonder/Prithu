@@ -4,15 +4,16 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-  "start-server": "npm run --prefix server start",
-  "start-client": "npm run --prefix client dev",
-  "start": "concurrently \"npm:start-server\" \"npm:start-client\""
-},
+    "start-server": "npm run --prefix server start",
+    "start-client": "npm run --prefix client dev",
+    "start": "concurrently \"npm:start-server\" \"npm:start-client\""
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
-    "concurrently": "^9.2.0"
+    "concurrently": "^9.2.0",
+    "lucide-react": "^0.525.0"
   }
 }

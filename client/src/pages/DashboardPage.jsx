@@ -1,50 +1,28 @@
-import React from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { MapContainer, TileLayer, Marker, Polyline, Tooltip } from 'react-leaflet';
 import L from 'leaflet';
 import { useDashboard } from '../hooks/useDashboard';
 import MapEvents from '../components/MapEvents';
 
-// --- Custom Marker Icons & Helper Functions ---
+// --- Icons & Helpers ---
 const blueIcon = new L.Icon({ iconUrl: 'https://cdn.rawgit.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png', shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png', iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]});
 const goldIcon = new L.Icon({ iconUrl: 'https://cdn.rawgit.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-gold.png', shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png', iconSize: [25, 41], iconAnchor: [12, 41], popupAnchor: [1, -34], shadowSize: [41, 41]});
 const highlightIcon = new L.Icon({ iconUrl: 'https://cdn.rawgit.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-yellow.png', shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png', iconSize: [35, 55], iconAnchor: [17, 55], popupAnchor: [1, -48], shadowSize: [55, 55]});
-
-const formatDuration = (seconds) => {
-    const hours = Math.floor(seconds / 3600);
-    const minutes = Math.round((seconds % 3600) / 60);
-    return `${hours > 0 ? `${hours} hr ` : ''}${minutes} min`;
-};
-
+const formatDuration = (seconds) => { const hours = Math.floor(seconds / 3600); const minutes = Math.round((seconds % 3600) / 60); return `${hours > 0 ? `${hours} hr ` : ''}${minutes} min`; };
 const bhilaiPosition = [21.21, 81.38];
+
+const PlusIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>;
+const TrashIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.124-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.077-2.09.921-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" /></svg>;
+const SaveIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>;
+const LoadIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 8.25V3m0 5.25-4.5-4.5M16.5 8.25 12 12.75" /></svg>;
 
 const DashboardPage = () => {
     const {
-        activeTab, setActiveTab,
-        markers,
-        optimizedResult,
-        isLoading,
-        panels,
-        savedPlaces,
-        savedRoutes,
-        sessionHistory,
-        highlightedSegment, setHighlightedSegment,
-        hoveredIndex, setHoveredIndex,
-        editingIndex, setEditingIndex, // Added
-        runOptimization,
-        addMarker,
-        handleRemoveMarker,
-        handleRenameMarker, // Added
-        handleMapClick,
-        handleSaveStop,
-        handleDeletePlace,
-        handleLoadRoute,
-        handleLoadFromHistory,
-        handleSaveFromHistory,
-        handleDeleteRoute,
-        togglePanel,
-        handleReset,
-        handleLogout,
-        orderedMarkers
+        activeTab, setActiveTab, markers, optimizedResult, isLoading, panels, savedPlaces, savedRoutes, sessionHistory,
+        highlightedSegment, setHighlightedSegment, hoveredIndex, setHoveredIndex, editingIndex, setEditingIndex,
+        runOptimization, addMarker, handleRemoveMarker, handleRenameMarker, handleMapClick, handleSaveStop, handleDeletePlace,
+        handleLoadRoute, handleLoadFromHistory, handleSaveFromHistory, handleDeleteRoute, togglePanel,
+        handleReset, handleLogout, orderedMarkers
     } = useDashboard();
 
     const getMarkerIcon = (marker, index) => {
@@ -52,55 +30,50 @@ const DashboardPage = () => {
         return marker.type === 'saved' ? goldIcon : blueIcon;
     };
 
-    const tabClass = (tabName) => `w-full py-2 text-center cursor-pointer ${activeTab === tabName ? 'bg-blue-600 text-white' : 'bg-gray-200'}`;
+    const tabClass = (tabName) => `flex-1 py-2.5 text-sm font-semibold text-center transition-colors duration-200 rounded-md ${activeTab === tabName ? 'bg-indigo-600 text-white shadow-sm' : 'bg-slate-200 text-slate-600 hover:bg-slate-300'}`;
 
     return (
-        <div className="flex h-screen w-screen bg-gray-50 relative">
-            <div className="w-full max-w-sm p-6 bg-white shadow-xl z-[1000] flex flex-col">
-                <div className="flex justify-between items-center mb-6"><h2 className="text-3xl font-bold text-gray-900">Prithu</h2><button onClick={handleLogout} className="text-sm bg-red-500 text-white py-1 px-3 rounded">Logout</button></div>
-                <div className="flex flex-col space-y-3"><button onClick={() => runOptimization(markers)} disabled={isLoading || markers.length < 2} className="w-full bg-blue-600 text-white font-bold py-2.5 px-4 rounded-lg shadow-md hover:bg-blue-700 disabled:bg-gray-400">{isLoading ? 'Optimizing...' : 'Optimize Now'}</button><button onClick={handleReset} className="w-full bg-gray-200 text-gray-700 font-bold py-2 px-4 rounded-lg hover:bg-gray-300">Reset</button></div>
-                <div className="flex mt-4 border-b"><div onClick={() => setActiveTab('planner')} className={tabClass('planner')}>Planner</div><div onClick={() => setActiveTab('history')} className={tabClass('history')}>History</div></div>
-                
-                <div className="mt-4 flex-grow overflow-y-auto">
+        <div className="flex h-screen w-screen bg-slate-100 font-sans relative">
+            <div className="w-full max-w-sm p-4 md:p-6 bg-white border-r border-slate-200 z-[1000] flex flex-col">
+                <div className="flex justify-between items-center mb-6 pb-4 border-b border-slate-200">
+                    {/* --- FIX #1: Bigger Logo --- */}
+                    <img src="/logo-full.png" alt="Prithu Logo" className="h-12" />
+                    <button onClick={handleLogout} className="text-sm font-semibold text-red-500 hover:text-red-400 transition-colors">Logout</button>
+                </div>
+                <div className="flex flex-col space-y-3">
+                    <button onClick={() => runOptimization(markers)} disabled={isLoading || markers.length < 2} className="w-full bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-bold py-3 px-4 rounded-lg shadow-md hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center">
+                        {isLoading ? 'Optimizing...' : 'Optimize Now'}
+                    </button>
+                    <button onClick={handleReset} className="w-full bg-slate-200 text-slate-700 font-bold py-2.5 px-4 rounded-lg hover:bg-slate-300 transition-colors">Reset</button>
+                </div>
+                <div className="flex mt-6 p-1 bg-slate-200/60 rounded-lg">
+                    <div onClick={() => setActiveTab('planner')} className={tabClass('planner')}>Planner</div>
+                    <div onClick={() => setActiveTab('history')} className={tabClass('history')}>History</div>
+                </div>
+                <div className="mt-4 flex-grow overflow-y-auto pr-2 -mr-2 text-slate-700">
                     {activeTab === 'planner' && (
-                        <>
-                            <div className="mb-4">
-                                <h3 onClick={() => togglePanel('currentRoute')} className="text-lg font-semibold text-gray-800 border-b pb-2 cursor-pointer flex justify-between items-center"><span>Current Route ({markers.length})</span><span>{panels.currentRoute ? '▼' : '▲'}</span></h3>
-                                {panels.currentRoute && (
-                                    <ol className="list-decimal list-inside mt-2 space-y-2">
-                                        {markers.map((marker, idx) => (
-                                            <li key={idx} onMouseEnter={() => setHoveredIndex(idx)} onMouseLeave={() => setHoveredIndex(null)} className="bg-gray-50 p-2 rounded-md border text-sm flex justify-between items-center">
-                                                {editingIndex === idx ? (
-                                                    <input type="text" defaultValue={marker.name} className="w-full p-1 border rounded" autoFocus onBlur={(e) => handleRenameMarker(idx, e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') handleRenameMarker(idx, e.target.value) }} />
-                                                ) : (
-                                                    <span className="truncate pr-2 cursor-pointer" title="Click to rename" onClick={() => setEditingIndex(idx)}><span className="font-bold">{`${idx + 1}. `}</span>{marker.name}</span>
-                                                )}
-                                                <div className="flex items-center space-x-2 flex-shrink-0">
-                                                    {marker.type !== 'saved' && <button onClick={() => handleSaveStop(marker.pos, marker.name)} className="text-xs bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600">Save</button>}
-                                                    <button onClick={() => handleRemoveMarker(idx)} className="text-xs bg-red-500 text-white font-bold w-5 h-5 rounded-full hover:bg-red-600">X</button>
-                                                </div>
-                                            </li>
-                                        ))}
-                                    </ol>
-                                )}
+                        <div className="space-y-4">
+                            <div>
+                                <h3 onClick={() => togglePanel('currentRoute')} className="text-lg font-bold text-slate-700 pb-2 cursor-pointer flex justify-between items-center"><span>Current Route ({markers.length})</span><span className={`transition-transform duration-300 text-slate-400 ${panels.currentRoute ? '' : '-rotate-90'}`}>▼</span></h3>
+                                {panels.currentRoute && (<ol className="space-y-2 mt-2">{markers.map((marker, idx) => (<li key={idx} onMouseEnter={() => setHoveredIndex(idx)} onMouseLeave={() => setHoveredIndex(null)} className="bg-slate-50 p-2.5 rounded-lg border border-slate-200 text-sm flex justify-between items-center group transition-colors hover:border-indigo-300">{editingIndex === idx ? (<input type="text" defaultValue={marker.name} className="w-full p-1 border rounded-md" autoFocus onBlur={(e) => handleRenameMarker(idx, e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') handleRenameMarker(idx, e.target.value) }} />) : (<span className="truncate pr-2 cursor-pointer" title="Click to rename" onClick={() => setEditingIndex(idx)}><span className="font-bold text-indigo-600">{`${idx + 1}. `}</span>{marker.name}</span>)}<div className="flex items-center space-x-3 flex-shrink-0">{marker.type !== 'saved' && <button onClick={() => handleSaveStop(marker.pos, marker.name)} className="text-slate-400 hover:text-green-600" title="Save Stop"><SaveIcon/></button>}<button onClick={() => handleRemoveMarker(idx)} className="text-slate-400 hover:text-red-600" title="Remove Stop"><TrashIcon/></button></div></li>))}</ol>)}
                             </div>
                             <div>
-                                <h3 onClick={() => togglePanel('savedPlaces')} className="text-lg font-semibold text-gray-800 border-b pb-2 cursor-pointer flex justify-between items-center"><span>Saved Places</span><span>{panels.savedPlaces ? '▼' : '▲'}</span></h3>
-                                {panels.savedPlaces && (<ul className="mt-2 space-y-2">{savedPlaces.map(place => (<li key={place._id} className="bg-gray-50 p-2 rounded-md border text-sm flex justify-between items-center"><span>{place.name}</span><div className="flex items-center space-x-2"><button onClick={() => addMarker([place.location.lat, place.location.lng], 'saved', place.name)} className="text-xs bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600">Add</button><button onClick={() => handleDeletePlace(place._id)} className="text-xs bg-gray-600 text-white font-bold w-5 h-5 rounded-full hover:bg-gray-700">X</button></div></li>))}</ul>)}
+                                <h3 onClick={() => togglePanel('savedPlaces')} className="text-lg font-bold text-slate-700 pb-2 cursor-pointer flex justify-between items-center"><span>Saved Places</span><span className={`transition-transform duration-300 text-slate-400 ${panels.savedPlaces ? '' : '-rotate-90'}`}>▼</span></h3>
+                                {panels.savedPlaces && (<ul className="mt-2 space-y-2">{savedPlaces.map(place => (<li key={place._id} className="bg-slate-50 p-2.5 rounded-lg border border-slate-200 text-sm flex justify-between items-center group transition-colors hover:border-indigo-300"><span>{place.name}</span><div className="flex items-center space-x-3"><button onClick={() => addMarker([place.location.lat, place.location.lng], 'saved', place.name)} className="text-indigo-600 hover:text-indigo-800" title="Add to Route"><PlusIcon/></button><button onClick={() => handleDeletePlace(place._id)} className="text-slate-400 hover:text-red-600" title="Delete Saved Place"><TrashIcon/></button></div></li>))}</ul>)}
                             </div>
-                        </>
+                        </div>
                     )}
                     {activeTab === 'history' && (
-                        <>
-                           <div className="mb-4">
-                                <h3 onClick={() => togglePanel('sessionHistory')} className="text-lg font-semibold text-gray-800 border-b pb-2 cursor-pointer flex justify-between items-center"><span>Session History</span><span>{panels.sessionHistory ? '▼' : '▲'}</span></h3>
-                                {panels.sessionHistory && (<ul className="mt-2 space-y-2">{sessionHistory.map((item, idx) => (<li key={idx} className="bg-gray-50 p-2 rounded-md border text-sm flex justify-between items-center"><span>{`${item.markers.length} stops @ ${item.timestamp.toLocaleTimeString()}`}</span><div className="flex items-center space-x-2"><button onClick={() => handleLoadFromHistory(item)} className="text-xs bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600">Load</button><button onClick={() => handleSaveFromHistory(item)} className="text-xs bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600">Save</button></div></li>))}</ul>)}
+                        <div className="space-y-4">
+                           <div>
+                                <h3 onClick={() => togglePanel('sessionHistory')} className="text-lg font-bold text-slate-700 pb-2 cursor-pointer flex justify-between items-center"><span>Session History</span><span className={`transition-transform duration-300 text-slate-400 ${panels.sessionHistory ? '' : '-rotate-90'}`}>▼</span></h3>
+                                {panels.sessionHistory && (<ul className="mt-2 space-y-2">{sessionHistory.map((item, idx) => (<li key={idx} className="bg-slate-50 p-2.5 rounded-lg border border-slate-200 text-sm flex justify-between items-center group transition-colors hover:border-indigo-300"><span>{`${item.markers.length} stops @ ${item.timestamp.toLocaleTimeString()}`}</span><div className="flex items-center space-x-3"><button onClick={() => handleLoadFromHistory(item)} className="text-indigo-600 hover:text-indigo-800" title="Load this Route"><LoadIcon/></button><button onClick={() => handleSaveFromHistory(item)} className="text-slate-400 hover:text-green-600" title="Save this Route"><SaveIcon/></button></div></li>))}</ul>)}
                             </div>
                             <div>
-                                <h3 onClick={() => togglePanel('savedRoutes')} className="text-lg font-semibold text-gray-800 border-b pb-2 cursor-pointer flex justify-between items-center"><span>Saved Routes</span><span>{panels.savedRoutes ? '▼' : '▲'}</span></h3>
-                                {panels.savedRoutes && (<ul className="mt-2 space-y-2">{savedRoutes.map(route => (<li key={route._id} className="bg-gray-50 p-2 rounded-md border text-sm flex justify-between items-center"><span>{route.name}</span><div className="flex items-center space-x-2"><button onClick={() => handleLoadRoute(route)} className="text-xs bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600">Load</button><button onClick={() => handleDeleteRoute(route._id)} className="text-xs bg-gray-600 text-white font-bold w-5 h-5 rounded-full hover:bg-gray-700">X</button></div></li>))}</ul>)}
+                                <h3 onClick={() => togglePanel('savedRoutes')} className="text-lg font-bold text-slate-700 pb-2 cursor-pointer flex justify-between items-center"><span>Saved Routes</span><span className={`transition-transform duration-300 text-slate-400 ${panels.savedRoutes ? '' : '-rotate-90'}`}>▼</span></h3>
+                                {panels.savedRoutes && (<ul className="mt-2 space-y-2">{savedRoutes.map(route => (<li key={route._id} className="bg-slate-50 p-2.5 rounded-lg border border-slate-200 text-sm flex justify-between items-center group transition-colors hover:border-indigo-300"><span>{route.name}</span><div className="flex items-center space-x-3"><button onClick={() => handleLoadRoute(route)} className="text-indigo-600 hover:text-indigo-800" title="Load Route"><LoadIcon/></button><button onClick={() => handleDeleteRoute(route._id)} className="text-slate-400 hover:text-red-600" title="Delete Route"><TrashIcon/></button></div></li>))}</ul>)}
                             </div>
-                        </>
+                        </div>
                     )}
                 </div>
             </div>
@@ -108,67 +81,33 @@ const DashboardPage = () => {
             <div className="flex-grow" onMouseLeave={() => setHighlightedSegment(null)}>
                 <MapContainer center={bhilaiPosition} zoom={13} style={{ height: '100%', width: '100%' }}>
                     <MapEvents onMapClick={handleMapClick} />
-                    <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution='&copy; OpenStreetMap' />
-                    
-                    {orderedMarkers.map((marker, i) => {
-                        const originalIndex = markers.findIndex(m => m.pos === marker.pos);
-                        return (
-                            <Marker key={i} position={marker.pos} icon={getMarkerIcon(marker, originalIndex)}>
-                                <Tooltip sticky>
-                                    <div className="font-sans">
-                                        <p className="font-bold text-base">{marker.name}</p>
-                                        {optimizedResult && (
-                                            <>
-                                                {optimizedResult.segments[i] ? (
-                                                    <p className="text-sm mt-1">
-                                                        To next: <span className="font-semibold">{(optimizedResult.segments[i].distance / 1000).toFixed(1)} km</span> | <span className="font-semibold">{formatDuration(optimizedResult.segments[i].duration)}</span>
-                                                    </p>
-                                                ) : (<p className="text-sm mt-1">Final Destination</p>)}
-                                            </>
-                                        )}
-                                    </div>
-                                </Tooltip>
-                            </Marker>
-                        );
-                    })}
-
-                    {optimizedResult && (
-                        <>
-                            {optimizedResult.segments.map((segment, index) => {
-                                const segmentSteps = segment.steps;
-                                const startPointIndex = segmentSteps[0].way_points[0];
-                                const endPointIndex = segmentSteps[segmentSteps.length - 1].way_points[1];
-                                const segmentPath = optimizedResult.path.slice(startPointIndex, endPointIndex + 1);
-                                
-                                let color = '#1D4ED8';
-                                if (highlightedSegment !== null) {
-                                    if (index < highlightedSegment) color = '#16a34a'; 
-                                    if (index === highlightedSegment) color = '#facc15';
-                                }
-
-                                return <Polyline key={index} positions={segmentPath} pathOptions={{ color, weight: 6, opacity: 0.85 }} />;
-                            })}
-                        </>
-                    )}
+                    {/* --- FIX #2: Reverted to light map theme --- */}
+                    // Replace it with this version
+<TileLayer
+    url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+/>
+                    {orderedMarkers.map((marker, i) => <Marker key={i} position={marker.pos} icon={getMarkerIcon(marker, orderedMarkers.findIndex(m => m === marker))} /> )}
+                    {optimizedResult && (<>{optimizedResult.segments.map((segment, index) => {const segmentSteps = segment.steps; const startPointIndex = segmentSteps[0].way_points[0]; const endPointIndex = segmentSteps[segmentSteps.length - 1].way_points[1]; const segmentPath = optimizedResult.path.slice(startPointIndex, endPointIndex + 1); let color = '#4f46e5'; if (highlightedSegment !== null) {if (index < highlightedSegment) color = '#22c55e'; if (index === highlightedSegment) color = '#facc15';} return <Polyline key={index} positions={segmentPath} pathOptions={{ color, weight: 6, opacity: 0.85 }} />;})}</>)}
                 </MapContainer>
             </div>
             
             {optimizedResult && (
-                <div className="absolute bottom-4 right-4 z-[1000] p-4 bg-white shadow-xl rounded-lg border max-h-[45vh] overflow-y-auto">
+                <div className="absolute bottom-4 right-4 z-[1000] p-4 bg-white/90 backdrop-blur-sm shadow-2xl rounded-xl border border-slate-200 max-h-[45vh] overflow-y-auto w-80">
                      <div className="mb-3">
-                        <h3 onClick={() => togglePanel('routeDetails')} className="text-md font-bold text-gray-800 border-b pb-1 mb-2 cursor-pointer flex justify-between items-center">
-                            <span>Route Details</span><span>{panels.routeDetails ? '▼' : '▲'}</span>
+                        <h3 onClick={() => togglePanel('routeDetails')} className="text-md font-bold text-slate-800 border-b border-slate-200 pb-2 mb-2 cursor-pointer flex justify-between items-center">
+                            <span>Route Details</span><span className={`transition-transform duration-300 text-slate-400 ${panels.routeDetails ? '' : '-rotate-90'}`}>▼</span>
                         </h3>
                         {panels.routeDetails && (
-                            <ul className="space-y-1 text-xs text-gray-600">
+                            <ul className="space-y-1 text-xs text-slate-600">
                                 {optimizedResult.segments.map((segment, idx) => {
-                                    const startMarkerIndex = optimizedResult.order[idx];
-                                    const endMarkerIndex = optimizedResult.order[idx+1];
+                                    const startMarker = orderedMarkers[idx];
+                                    const endMarker = orderedMarkers[idx+1];
                                     return (
                                         <li key={idx} 
                                             onMouseEnter={() => setHighlightedSegment(idx)}
-                                            className={`p-1.5 rounded-md flex justify-between cursor-pointer transition-colors ${highlightedSegment === idx ? 'bg-yellow-200' : 'hover:bg-gray-100'}`}>
-                                            <span className="font-bold">{startMarkerIndex + 1} → {endMarkerIndex + 1}: </span> 
+                                            className={`p-1.5 rounded-lg flex justify-between cursor-pointer transition-colors ${highlightedSegment === idx ? 'bg-amber-100' : 'hover:bg-slate-100'}`}>
+                                            <span className="font-bold">{startMarker?.name || 'Start'} → {endMarker?.name || 'End'}: </span> 
                                             <span className="font-mono">{(segment.distance / 1000).toFixed(1)} km | {formatDuration(segment.duration)}</span>
                                         </li>
                                     )
@@ -176,14 +115,11 @@ const DashboardPage = () => {
                             </ul>
                         )}
                     </div>
-                    <h3 className="text-md font-bold text-gray-800 text-center mb-2 pt-2 border-t">Total Summary</h3>
+                    <h3 className="text-md font-bold text-slate-800 text-center mb-2 pt-3 border-t border-slate-200">Total Summary</h3>
                     <div className="grid grid-cols-2 gap-x-6 gap-y-2">
-                        <div className="font-semibold text-gray-600 text-right">Stops:</div>
-                        <div className="font-mono text-lg">{markers.length}</div>
-                        <div className="font-semibold text-gray-600 text-right">Distance:</div>
-                        <div className="font-mono text-lg">{(optimizedResult.summary.distance / 1000).toFixed(1)} km</div>
-                        <div className="font-semibold text-gray-600 text-right">Time:</div>
-                        <div className="font-mono text-lg">{formatDuration(optimizedResult.summary.duration)}</div>
+                        <div className="font-semibold text-slate-600 text-right">Stops:</div><div className="font-mono text-lg text-slate-900">{markers.length}</div>
+                        <div className="font-semibold text-slate-600 text-right">Distance:</div><div className="font-mono text-lg text-slate-900">{(optimizedResult.summary.distance / 1000).toFixed(1)} km</div>
+                        <div className="font-semibold text-slate-600 text-right">Time:</div><div className="font-mono text-lg text-slate-900">{formatDuration(optimizedResult.summary.duration)}</div>
                     </div>
                 </div>
             )}
