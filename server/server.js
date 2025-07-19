@@ -9,23 +9,8 @@ const app = express();
 connectDB();
 
 // --- NEW, SIMPLIFIED CORS CONFIGURATION ---
-const allowedOrigins = [
-    'http://localhost:5173', // For your local development
-    'https://prithu.netlify.app' // IMPORTANT: YOUR LIVE NETLIFY URL
-];
-
-const corsOptions = {
-  origin: (origin, callback) => {
-    // Allow requests if the origin is in our list, or if there's no origin (like from a mobile app)
-    if (allowedOrigins.includes(origin) || !origin) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  }
-};
-
-app.use(cors(corsOptions));
+// This tells the server to accept requests from ANY origin.
+app.use(cors());
 // --- END OF NEW CORS CONFIGURATION ---
 
 // Init Middleware
