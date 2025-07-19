@@ -30,13 +30,13 @@ const DashboardPage = () => {
         return marker.type === 'saved' ? goldIcon : blueIcon;
     };
 
-    const tabClass = (tabName) => `flex-1 py-2.5 text-sm font-semibold text-center transition-colors duration-200 rounded-md ${activeTab === tabName ? 'bg-indigo-600 text-white shadow-sm' : 'bg-slate-200 text-slate-600 hover:bg-slate-300'}`;
+    const tabClass = (tabName) => `flex-1 py-2.5 text-sm font-semibold text-center transition-colors duration-200 rounded-md ${activeTab === tabName ? 'bg-indigo-600 text-white shadow-sm' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}`;
 
     return (
         <div className="flex h-screen w-screen bg-slate-100 font-sans relative">
-            <div className="w-full max-w-sm p-4 md:p-6 bg-white border-r border-slate-200 z-[1000] flex flex-col">
-                <div className="flex justify-between items-center mb-6 pb-4 border-b border-slate-200">
-                    {/* --- FIX #1: Bigger Logo --- */}
+            {/* --- Sidebar with Dark Theme --- */}
+            <div className="w-full max-w-sm p-4 md:p-6 bg-slate-800 border-r border-slate-700 z-[1000] flex flex-col">
+                <div className="flex justify-between items-center mb-6 pb-4 border-b border-slate-700">
                     <img src="/logo-full.png" alt="Prithu Logo" className="h-12" />
                     <button onClick={handleLogout} className="text-sm font-semibold text-red-500 hover:text-red-400 transition-colors">Logout</button>
                 </div>
@@ -44,34 +44,34 @@ const DashboardPage = () => {
                     <button onClick={() => runOptimization(markers)} disabled={isLoading || markers.length < 2} className="w-full bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-bold py-3 px-4 rounded-lg shadow-md hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center">
                         {isLoading ? 'Optimizing...' : 'Optimize Now'}
                     </button>
-                    <button onClick={handleReset} className="w-full bg-slate-200 text-slate-700 font-bold py-2.5 px-4 rounded-lg hover:bg-slate-300 transition-colors">Reset</button>
+                    <button onClick={handleReset} className="w-full bg-slate-700 text-slate-300 font-bold py-2.5 px-4 rounded-lg hover:bg-slate-600 transition-colors">Reset</button>
                 </div>
-                <div className="flex mt-6 p-1 bg-slate-200/60 rounded-lg">
+                <div className="flex mt-6 p-1 bg-slate-900/60 rounded-lg gap-1">
                     <div onClick={() => setActiveTab('planner')} className={tabClass('planner')}>Planner</div>
                     <div onClick={() => setActiveTab('history')} className={tabClass('history')}>History</div>
                 </div>
-                <div className="mt-4 flex-grow overflow-y-auto pr-2 -mr-2 text-slate-700">
+                <div className="mt-4 flex-grow overflow-y-auto pr-2 -mr-2 text-slate-300">
                     {activeTab === 'planner' && (
                         <div className="space-y-4">
                             <div>
-                                <h3 onClick={() => togglePanel('currentRoute')} className="text-lg font-bold text-slate-700 pb-2 cursor-pointer flex justify-between items-center"><span>Current Route ({markers.length})</span><span className={`transition-transform duration-300 text-slate-400 ${panels.currentRoute ? '' : '-rotate-90'}`}>▼</span></h3>
-                                {panels.currentRoute && (<ol className="space-y-2 mt-2">{markers.map((marker, idx) => (<li key={idx} onMouseEnter={() => setHoveredIndex(idx)} onMouseLeave={() => setHoveredIndex(null)} className="bg-slate-50 p-2.5 rounded-lg border border-slate-200 text-sm flex justify-between items-center group transition-colors hover:border-indigo-300">{editingIndex === idx ? (<input type="text" defaultValue={marker.name} className="w-full p-1 border rounded-md" autoFocus onBlur={(e) => handleRenameMarker(idx, e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') handleRenameMarker(idx, e.target.value) }} />) : (<span className="truncate pr-2 cursor-pointer" title="Click to rename" onClick={() => setEditingIndex(idx)}><span className="font-bold text-indigo-600">{`${idx + 1}. `}</span>{marker.name}</span>)}<div className="flex items-center space-x-3 flex-shrink-0">{marker.type !== 'saved' && <button onClick={() => handleSaveStop(marker.pos, marker.name)} className="text-slate-400 hover:text-green-600" title="Save Stop"><SaveIcon/></button>}<button onClick={() => handleRemoveMarker(idx)} className="text-slate-400 hover:text-red-600" title="Remove Stop"><TrashIcon/></button></div></li>))}</ol>)}
+                                <h3 onClick={() => togglePanel('currentRoute')} className="text-lg font-bold text-slate-200 pb-2 cursor-pointer flex justify-between items-center"><span>Current Route ({markers.length})</span><span className={`transition-transform duration-300 text-slate-500 ${panels.currentRoute ? '' : '-rotate-90'}`}>▼</span></h3>
+                                {panels.currentRoute && (<ol className="space-y-2 mt-2">{markers.map((marker, idx) => (<li key={idx} onMouseEnter={() => setHoveredIndex(idx)} onMouseLeave={() => setHoveredIndex(null)} className="bg-slate-700/50 p-2.5 rounded-lg border border-slate-700 text-sm flex justify-between items-center group transition-colors hover:border-blue-500">{editingIndex === idx ? (<input type="text" defaultValue={marker.name} className="w-full p-1 bg-slate-600 border border-slate-500 rounded-md text-white" autoFocus onBlur={(e) => handleRenameMarker(idx, e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') handleRenameMarker(idx, e.target.value) }} />) : (<span className="truncate pr-2 cursor-pointer" title="Click to rename" onClick={() => setEditingIndex(idx)}><span className="font-bold text-cyan-400">{`${idx + 1}. `}</span>{marker.name}</span>)}<div className="flex items-center space-x-3 flex-shrink-0">{marker.type !== 'saved' && <button onClick={() => handleSaveStop(marker.pos, marker.name)} className="text-slate-400 hover:text-green-400 transition-colors" title="Save Stop"><SaveIcon/></button>}<button onClick={() => handleRemoveMarker(idx)} className="text-slate-400 hover:text-red-500 transition-colors" title="Remove Stop"><TrashIcon/></button></div></li>))}</ol>)}
                             </div>
                             <div>
-                                <h3 onClick={() => togglePanel('savedPlaces')} className="text-lg font-bold text-slate-700 pb-2 cursor-pointer flex justify-between items-center"><span>Saved Places</span><span className={`transition-transform duration-300 text-slate-400 ${panels.savedPlaces ? '' : '-rotate-90'}`}>▼</span></h3>
-                                {panels.savedPlaces && (<ul className="mt-2 space-y-2">{savedPlaces.map(place => (<li key={place._id} className="bg-slate-50 p-2.5 rounded-lg border border-slate-200 text-sm flex justify-between items-center group transition-colors hover:border-indigo-300"><span>{place.name}</span><div className="flex items-center space-x-3"><button onClick={() => addMarker([place.location.lat, place.location.lng], 'saved', place.name)} className="text-indigo-600 hover:text-indigo-800" title="Add to Route"><PlusIcon/></button><button onClick={() => handleDeletePlace(place._id)} className="text-slate-400 hover:text-red-600" title="Delete Saved Place"><TrashIcon/></button></div></li>))}</ul>)}
+                                <h3 onClick={() => togglePanel('savedPlaces')} className="text-lg font-bold text-slate-200 pb-2 cursor-pointer flex justify-between items-center"><span>Saved Places</span><span className={`transition-transform duration-300 text-slate-500 ${panels.savedPlaces ? '' : '-rotate-90'}`}>▼</span></h3>
+                                {panels.savedPlaces && (<ul className="mt-2 space-y-2">{savedPlaces.map(place => (<li key={place._id} className="bg-slate-700/50 p-2.5 rounded-lg border border-slate-700 text-sm flex justify-between items-center group transition-colors hover:border-blue-500"><span>{place.name}</span><div className="flex items-center space-x-3"><button onClick={() => addMarker([place.location.lat, place.location.lng], 'saved', place.name)} className="text-cyan-400 hover:text-cyan-300 transition-colors" title="Add to Route"><PlusIcon/></button><button onClick={() => handleDeletePlace(place._id)} className="text-slate-400 hover:text-red-500 transition-colors" title="Delete Saved Place"><TrashIcon/></button></div></li>))}</ul>)}
                             </div>
                         </div>
                     )}
                     {activeTab === 'history' && (
                         <div className="space-y-4">
                            <div>
-                                <h3 onClick={() => togglePanel('sessionHistory')} className="text-lg font-bold text-slate-700 pb-2 cursor-pointer flex justify-between items-center"><span>Session History</span><span className={`transition-transform duration-300 text-slate-400 ${panels.sessionHistory ? '' : '-rotate-90'}`}>▼</span></h3>
-                                {panels.sessionHistory && (<ul className="mt-2 space-y-2">{sessionHistory.map((item, idx) => (<li key={idx} className="bg-slate-50 p-2.5 rounded-lg border border-slate-200 text-sm flex justify-between items-center group transition-colors hover:border-indigo-300"><span>{`${item.markers.length} stops @ ${item.timestamp.toLocaleTimeString()}`}</span><div className="flex items-center space-x-3"><button onClick={() => handleLoadFromHistory(item)} className="text-indigo-600 hover:text-indigo-800" title="Load this Route"><LoadIcon/></button><button onClick={() => handleSaveFromHistory(item)} className="text-slate-400 hover:text-green-600" title="Save this Route"><SaveIcon/></button></div></li>))}</ul>)}
+                                <h3 onClick={() => togglePanel('sessionHistory')} className="text-lg font-bold text-slate-200 pb-2 cursor-pointer flex justify-between items-center"><span>Session History</span><span className={`transition-transform duration-300 text-slate-500 ${panels.sessionHistory ? '' : '-rotate-90'}`}>▼</span></h3>
+                                {panels.sessionHistory && (<ul className="mt-2 space-y-2">{sessionHistory.map((item, idx) => (<li key={idx} className="bg-slate-700/50 p-2.5 rounded-lg border border-slate-700 text-sm flex justify-between items-center group transition-colors hover:border-blue-500"><span>{`${item.markers.length} stops @ ${item.timestamp.toLocaleTimeString()}`}</span><div className="flex items-center space-x-3"><button onClick={() => handleLoadFromHistory(item)} className="text-cyan-400 hover:text-cyan-300 transition-colors" title="Load this Route"><LoadIcon/></button><button onClick={() => handleSaveFromHistory(item)} className="text-slate-400 hover:text-green-400 transition-colors" title="Save this Route"><SaveIcon/></button></div></li>))}</ul>)}
                             </div>
                             <div>
-                                <h3 onClick={() => togglePanel('savedRoutes')} className="text-lg font-bold text-slate-700 pb-2 cursor-pointer flex justify-between items-center"><span>Saved Routes</span><span className={`transition-transform duration-300 text-slate-400 ${panels.savedRoutes ? '' : '-rotate-90'}`}>▼</span></h3>
-                                {panels.savedRoutes && (<ul className="mt-2 space-y-2">{savedRoutes.map(route => (<li key={route._id} className="bg-slate-50 p-2.5 rounded-lg border border-slate-200 text-sm flex justify-between items-center group transition-colors hover:border-indigo-300"><span>{route.name}</span><div className="flex items-center space-x-3"><button onClick={() => handleLoadRoute(route)} className="text-indigo-600 hover:text-indigo-800" title="Load Route"><LoadIcon/></button><button onClick={() => handleDeleteRoute(route._id)} className="text-slate-400 hover:text-red-600" title="Delete Route"><TrashIcon/></button></div></li>))}</ul>)}
+                                <h3 onClick={() => togglePanel('savedRoutes')} className="text-lg font-bold text-slate-200 pb-2 cursor-pointer flex justify-between items-center"><span>Saved Routes</span><span className={`transition-transform duration-300 text-slate-500 ${panels.savedRoutes ? '' : '-rotate-90'}`}>▼</span></h3>
+                                {panels.savedRoutes && (<ul className="mt-2 space-y-2">{savedRoutes.map(route => (<li key={route._id} className="bg-slate-700/50 p-2.5 rounded-lg border border-slate-700 text-sm flex justify-between items-center group transition-colors hover:border-blue-500"><span>{route.name}</span><div className="flex items-center space-x-3"><button onClick={() => handleLoadRoute(route)} className="text-cyan-400 hover:text-cyan-300 transition-colors" title="Load Route"><LoadIcon/></button><button onClick={() => handleDeleteRoute(route._id)} className="text-slate-400 hover:text-red-500 transition-colors" title="Delete Route"><TrashIcon/></button></div></li>))}</ul>)}
                             </div>
                         </div>
                     )}
@@ -81,33 +81,33 @@ const DashboardPage = () => {
             <div className="flex-grow" onMouseLeave={() => setHighlightedSegment(null)}>
                 <MapContainer center={bhilaiPosition} zoom={13} style={{ height: '100%', width: '100%' }}>
                     <MapEvents onMapClick={handleMapClick} />
-                    {/* --- FIX #2: Reverted to light map theme --- */}
-                    // Replace it with this version
-<TileLayer
-    url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
-    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
-/>
+                    {/* --- Reverted to a full-color, light map theme --- */}
+                    <TileLayer
+                        url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+                        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+                    />
                     {orderedMarkers.map((marker, i) => <Marker key={i} position={marker.pos} icon={getMarkerIcon(marker, orderedMarkers.findIndex(m => m === marker))} /> )}
                     {optimizedResult && (<>{optimizedResult.segments.map((segment, index) => {const segmentSteps = segment.steps; const startPointIndex = segmentSteps[0].way_points[0]; const endPointIndex = segmentSteps[segmentSteps.length - 1].way_points[1]; const segmentPath = optimizedResult.path.slice(startPointIndex, endPointIndex + 1); let color = '#4f46e5'; if (highlightedSegment !== null) {if (index < highlightedSegment) color = '#22c55e'; if (index === highlightedSegment) color = '#facc15';} return <Polyline key={index} positions={segmentPath} pathOptions={{ color, weight: 6, opacity: 0.85 }} />;})}</>)}
                 </MapContainer>
             </div>
             
+            {/* --- Summary Panel with Dark Theme --- */}
             {optimizedResult && (
-                <div className="absolute bottom-4 right-4 z-[1000] p-4 bg-white/90 backdrop-blur-sm shadow-2xl rounded-xl border border-slate-200 max-h-[45vh] overflow-y-auto w-80">
+                <div className="absolute bottom-4 right-4 z-[1000] p-4 bg-slate-800/80 backdrop-blur-sm shadow-2xl rounded-xl border border-slate-700 max-h-[45vh] overflow-y-auto w-80">
                      <div className="mb-3">
-                        <h3 onClick={() => togglePanel('routeDetails')} className="text-md font-bold text-slate-800 border-b border-slate-200 pb-2 mb-2 cursor-pointer flex justify-between items-center">
+                        <h3 onClick={() => togglePanel('routeDetails')} className="text-md font-bold text-slate-200 border-b border-slate-700 pb-2 mb-2 cursor-pointer flex justify-between items-center">
                             <span>Route Details</span><span className={`transition-transform duration-300 text-slate-400 ${panels.routeDetails ? '' : '-rotate-90'}`}>▼</span>
                         </h3>
                         {panels.routeDetails && (
-                            <ul className="space-y-1 text-xs text-slate-600">
+                            <ul className="space-y-1 text-xs text-slate-300">
                                 {optimizedResult.segments.map((segment, idx) => {
                                     const startMarker = orderedMarkers[idx];
                                     const endMarker = orderedMarkers[idx+1];
                                     return (
                                         <li key={idx} 
                                             onMouseEnter={() => setHighlightedSegment(idx)}
-                                            className={`p-1.5 rounded-lg flex justify-between cursor-pointer transition-colors ${highlightedSegment === idx ? 'bg-amber-100' : 'hover:bg-slate-100'}`}>
-                                            <span className="font-bold">{startMarker?.name || 'Start'} → {endMarker?.name || 'End'}: </span> 
+                                            className={`p-1.5 rounded-lg flex justify-between cursor-pointer transition-colors ${highlightedSegment === idx ? 'bg-amber-400/20' : 'hover:bg-slate-700/50'}`}>
+                                            <span className="font-bold text-slate-100">{startMarker?.name || 'Start'} → {endMarker?.name || 'End'}: </span> 
                                             <span className="font-mono">{(segment.distance / 1000).toFixed(1)} km | {formatDuration(segment.duration)}</span>
                                         </li>
                                     )
@@ -115,11 +115,11 @@ const DashboardPage = () => {
                             </ul>
                         )}
                     </div>
-                    <h3 className="text-md font-bold text-slate-800 text-center mb-2 pt-3 border-t border-slate-200">Total Summary</h3>
+                    <h3 className="text-md font-bold text-slate-200 text-center mb-2 pt-3 border-t border-slate-700">Total Summary</h3>
                     <div className="grid grid-cols-2 gap-x-6 gap-y-2">
-                        <div className="font-semibold text-slate-600 text-right">Stops:</div><div className="font-mono text-lg text-slate-900">{markers.length}</div>
-                        <div className="font-semibold text-slate-600 text-right">Distance:</div><div className="font-mono text-lg text-slate-900">{(optimizedResult.summary.distance / 1000).toFixed(1)} km</div>
-                        <div className="font-semibold text-slate-600 text-right">Time:</div><div className="font-mono text-lg text-slate-900">{formatDuration(optimizedResult.summary.duration)}</div>
+                        <div className="font-semibold text-slate-400 text-right">Stops:</div><div className="font-mono text-lg text-white">{markers.length}</div>
+                        <div className="font-semibold text-slate-400 text-right">Distance:</div><div className="font-mono text-lg text-white">{(optimizedResult.summary.distance / 1000).toFixed(1)} km</div>
+                        <div className="font-semibold text-slate-400 text-right">Time:</div><div className="font-mono text-lg text-white">{formatDuration(optimizedResult.summary.duration)}</div>
                     </div>
                 </div>
             )}
