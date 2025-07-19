@@ -1,43 +1,56 @@
+console.log("--- Server process started ---");
+
 const express = require('express');
+console.log("1. Express loaded successfully.");
+
 const connectDB = require('./config/db');
+console.log("2. DB config loaded.");
+
 const cors = require('cors');
 require('dotenv').config();
+console.log("3. CORS and dotenv loaded.");
 
 const app = express();
+console.log("4. Express app initialized.");
 
 // Connect to Database
-connectDB();
+connectDB(); // This function has its own "MongoDB Connected..." log
 
-// --- CORS Configuration ---
-// This allows your live frontend to communicate with this backend.
+// CORS Configuration
 const allowedOrigins = [
-    'http://localhost:5173', // Your local dev environment
-    'https://prithu.netlify.app' // IMPORTANT: YOUR LIVE NETLIFY URL
+    'http://localhost:5173',
+    'https://your-netlify-site-name.netlify.app' // IMPORTANT: YOUR LIVE NETLIFY URL
 ];
 
 app.use(cors({
   origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.indexOf(origin) === -1) {
-      const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
-      return callback(new Error(msg), false);
+    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('CORS policy violation'));
     }
-    return callback(null, true);
   }
 }));
+console.log("5. CORS configured.");
 
 // Init Middleware
 app.use(express.json({ extended: false }));
+console.log("6. JSON middleware initialized.");
 
 // Define Routes
+console.log("7. Attempting to define routes...");
 app.use('/api/auth', require('./routes/authRoutes'));
+console.log("   - /api/auth route defined.");
 app.use('/api/optimize', require('./routes/optimizationRoutes'));
+console.log("   - /api/optimize route defined.");
 app.use('/api/places', require('./routes/placeRoutes'));
+console.log("   - /api/places route defined.");
 app.use('/api/routes', require('./routes/routeRoutes'));
+console.log("   - /api/routes route defined.");
 app.use('/api/feedback', require('./routes/feedbackRoutes'));
-
+console.log("   - /api/feedback route defined.");
+console.log("8. All routes defined successfully.");
 
 const PORT = process.env.PORT || 5001;
 
-app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
+app.listen(PORT, () => console.log(`--- Server successfully started on port ${PORT} ---`));
