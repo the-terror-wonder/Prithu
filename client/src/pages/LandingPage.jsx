@@ -66,7 +66,7 @@ const LandingPage = () => {
                         Stop Guessing, Start Optimizing
                     </h1>
                     <p className="mt-6 max-w-3xl mx-auto text-lg md:text-xl text-slate-400">
-                        For delivery drivers, field agents, and explorers in Bhilai, Prithu turns a complex list of stops into the most efficient route, saving you valuable time, fuel, and effort every single day.
+                        For delivery drivers, field agents, and explorers All over the world, Prithu turns a complex list of stops into the most efficient route, saving you valuable time, fuel, and effort every single day.
                     </p>
                 </div>
 
