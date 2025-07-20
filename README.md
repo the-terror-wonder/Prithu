@@ -13,51 +13,6 @@ This project was built as a comprehensive portfolio piece to showcase a wide ran
 
 ---
 
-## 📸 Screenshots
-
-### 1. The Landing Page  
-A modern, dark-themed landing page that explains the project's value proposition and includes a functional feedback form.  
-<br>  
-<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/288f509c-b26f-4576-8944-02672f3ec758" />
-<br>
-
----
-
-### 2. Secure Authentication  
-Clean, professional, and responsive login and registration pages.  
-<br>  
-<img width="1919" height="1079" alt="image" src="https://github.com/user-attachments/assets/c3492034-721f-4793-92df-5b5c71f23d01" />
-<br>
-
----
-
-### 3. The Dashboard & Route Planner  
-The main user interface, featuring a dark-themed sidebar for planning and a clear, light-themed map for interaction.  
-<br>  
-<img width="1915" height="1079" alt="image" src="https://github.com/user-attachments/assets/3ee1e4bf-fb5f-4c78-b6e0-c36f0795efdb" />
- 
-<br>
-
----
-
-### 4. Optimized Route & Interactive Summary  
-An optimized route on the map, with an interactive summary panel that highlights the path when you hover over a segment.  
-<br>  
-<img width="1919" height="1079" alt="image" src="https://github.com/user-attachments/assets/cb6ecea6-01dd-4bb3-8b9e-25fc4774f645" />
-
-<br>
-
----
-
-### 5. History & Saved Data Management  
-The history tab, showing session history and permanently saved routes in collapsible panels.  
-<br>  
-<img width="1919" height="1079" alt="image" src="https://github.com/user-attachments/assets/9ab0ca23-7bfd-4f81-a4e1-be285f823a80" />
-
-<br>
-
----
-
 ## 🎯 Project Goals & Motivation
 
 The primary motivation behind Prithu was to create a project that stands out in internship interviews by tackling a high-value, real-world problem. The goal was to move beyond simple CRUD apps and demonstrate a deep understanding of both practical web development and fundamental computer science principles.
@@ -142,6 +97,50 @@ The project proves the ability to handle the entire development lifecycle, from 
 - **Tailwind CSS** – Utility-first CSS framework  
 - **Leaflet & React-Leaflet** – For map interaction  
 - **Axios** – For making API requests
+
+---
+## 📸 Screenshots
+
+### 1. The Landing Page  
+A modern, dark-themed landing page that explains the project's value proposition and includes a functional feedback form.  
+<br>  
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/288f509c-b26f-4576-8944-02672f3ec758" />
+<br>
+
+---
+
+### 2. Secure Authentication  
+Clean, professional, and responsive login and registration pages.  
+<br>  
+<img width="1919" height="1079" alt="image" src="https://github.com/user-attachments/assets/c3492034-721f-4793-92df-5b5c71f23d01" />
+<br>
+
+---
+
+### 3. The Dashboard & Route Planner  
+The main user interface, featuring a dark-themed sidebar for planning and a clear, light-themed map for interaction.  
+<br>  
+<img width="1915" height="1079" alt="image" src="https://github.com/user-attachments/assets/3ee1e4bf-fb5f-4c78-b6e0-c36f0795efdb" />
+ 
+<br>
+
+---
+
+### 4. Optimized Route & Interactive Summary  
+An optimized route on the map, with an interactive summary panel that highlights the path when you hover over a segment.  
+<br>  
+<img width="1919" height="1079" alt="image" src="https://github.com/user-attachments/assets/cb6ecea6-01dd-4bb3-8b9e-25fc4774f645" />
+
+<br>
+
+---
+
+### 5. History & Saved Data Management  
+The history tab, showing session history and permanently saved routes in collapsible panels.  
+<br>  
+<img width="1919" height="1079" alt="image" src="https://github.com/user-attachments/assets/9ab0ca23-7bfd-4f81-a4e1-be285f823a80" />
+
+<br>
 
 ---
 
