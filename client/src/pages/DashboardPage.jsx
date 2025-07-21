@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React from 'react';
 import { MapContainer, TileLayer, Marker, Polyline, Tooltip } from 'react-leaflet';
 import L from 'leaflet';
 import { useDashboard } from '../hooks/useDashboard';
@@ -15,6 +15,16 @@ const PlusIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewB
 const TrashIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.124-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.077-2.09.921-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" /></svg>;
 const SaveIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" /></svg>;
 const LoadIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-5 h-5"><path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 8.25V3m0 5.25-4.5-4.5M16.5 8.25 12 12.75" /></svg>;
+
+// --- NEW: Loading Spinner Component ---
+const LoadingSpinner = () => (
+    <div className="absolute inset-0 bg-slate-900 bg-opacity-60 backdrop-blur-sm flex items-center justify-center z-[1000]">
+        <div className="flex flex-col items-center">
+            <div className="w-16 h-16 border-4 border-t-4 border-t-cyan-400 border-slate-600 rounded-full animate-spin"></div>
+            <p className="mt-4 text-white font-semibold text-lg">Optimizing Route...</p>
+        </div>
+    </div>
+);
 
 const DashboardPage = () => {
     const {
@@ -34,7 +44,6 @@ const DashboardPage = () => {
 
     return (
         <div className="flex h-screen w-screen bg-slate-100 font-sans relative">
-            {/* --- Sidebar with Dark Theme --- */}
             <div className="w-full max-w-sm p-4 md:p-6 bg-slate-800 border-r border-slate-700 z-[1000] flex flex-col">
                 <div className="flex justify-between items-center mb-6 pb-4 border-b border-slate-700">
                     <img src="/logo-full.png" alt="Prithu Logo" className="h-12" />
@@ -78,10 +87,11 @@ const DashboardPage = () => {
                 </div>
             </div>
 
-            <div className="flex-grow" onMouseLeave={() => setHighlightedSegment(null)}>
+            {/* --- UPDATED: Map Area --- */}
+            <div className="flex-grow relative" onMouseLeave={() => setHighlightedSegment(null)}>
+                {isLoading && <LoadingSpinner />}
                 <MapContainer center={bhilaiPosition} zoom={13} style={{ height: '100%', width: '100%' }}>
                     <MapEvents onMapClick={handleMapClick} />
-                    {/* --- Reverted to a full-color, light map theme --- */}
                     <TileLayer
                         url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
                         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
@@ -91,7 +101,6 @@ const DashboardPage = () => {
                 </MapContainer>
             </div>
             
-            {/* --- Summary Panel with Dark Theme --- */}
             {optimizedResult && (
                 <div className="absolute bottom-4 right-4 z-[1000] p-4 bg-slate-800/80 backdrop-blur-sm shadow-2xl rounded-xl border border-slate-700 max-h-[45vh] overflow-y-auto w-80">
                      <div className="mb-3">
