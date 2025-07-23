@@ -30,7 +30,7 @@ const LoginPage = () => {
               disabled={isLoading}
               className="w-full bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-bold p-3 rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isLoading ? 'Registering...' : 'Register'}
+              {isLoading ? 'Loading...' : 'Login'}
             </button>
           </form>
           <p className="mt-6 text-center text-sm text-slate-600">
