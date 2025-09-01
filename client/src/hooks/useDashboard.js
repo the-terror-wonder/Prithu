@@ -17,6 +17,19 @@ export const useDashboard = () => {
     const [highlightedSegment, setHighlightedSegment] = useState(null);
     const [hoveredIndex, setHoveredIndex] = useState(null);
     const [editingIndex, setEditingIndex] = useState(null);
+    
+    useEffect(() => {
+        const wakeUpServer = async () => {
+            try {
+                console.log("Pinging server to wake it up...");
+                await api.get('/health');
+                console.log("Server is awake.");
+            } catch (err) {
+                console.error("Server ping failed:", err.message);
+            }
+        };
+        wakeUpServer();
+    }, []); // Empty array ensures this runs only once when the dashboard loads
 
     useEffect(() => {
         const fetchData = async () => {
