@@ -7,7 +7,7 @@ const LoginPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const onChange = e => setFormData({ ...formData, [e.target.name]: e.target.value });
-  const onSubmit = async e => { e.preventDefault(); setIsLoading(true); try { const res = await api.post('/auth/login', { username: formData.username, password: formData.password }); localStorage.setItem('token', res.data.accessToken); navigate('/dashboard'); } catch (err) { alert('Invalid Credentials'); setIsLoading(false); } };
+  const onSubmit = async e => { e.preventDefault(); setIsLoading(true); try { const res = await api.post('/auth/login', { username: formData.username, password: formData.password });   localStorage.setItem('token', res.data.accessToken); navigate('/dashboard'); } catch (err) { alert('Invalid Credentials'); setIsLoading(false); } };
 
   return (
     <div className="min-h-screen w-full flex bg-slate-50 font-sans">

@@ -1,3 +1,5 @@
+console.log("--- Loading Optimization Routes ---");
+
 const express = require('express');
 const router = express.Router();
 const auth = require('../middleware/authMiddleware');

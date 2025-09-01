@@ -1,3 +1,6 @@
+console.log("--- Loading Optimization Controller ---");
+console.log("ORS API Key Found:", !!process.env.ORS_API_KEY);
+
 const axios = require('axios');
 
 // --- HELPER FOR API CALLS ---
@@ -75,7 +78,6 @@ exports.snapToRoad = async (req, res) => {
         const response = await orsApi.get(`/geocode/reverse?point.lon=${lng}&point.lat=${lat}&layers=street&sources=osm`, {
             headers: { 'Authorization': process.env.ORS_API_KEY }
         });
-
         if (response.data.features.length > 0) {
             const feature = response.data.features[0];
             const snappedLocation = feature.geometry.coordinates; // This is [lng, lat]

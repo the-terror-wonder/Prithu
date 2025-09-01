@@ -23,6 +23,7 @@ exports.register = async (req, res) => {
 
         const payload = { user: { id: user.id } };
         const tokens = generateTokens(payload);
+        // console.log(tokens);
         
         res.json(tokens);
     } catch (err) {
@@ -40,7 +41,7 @@ exports.login = async (req, res) => {
         if (!isMatch) return res.status(400).json({ msg: 'Invalid Credentials' });
 
         const payload = { user: { id: user.id } };
-        const tokens = generateTokens(payload);
+        const tokens = generateTokens(payload); 
         
         res.json(tokens);
     } catch (err) {

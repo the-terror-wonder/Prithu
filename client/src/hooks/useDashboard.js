@@ -80,7 +80,7 @@ export const useDashboard = () => {
         setEditingIndex(null);
     };
 
-    const handleMapClick = async (e) => {
+    const handleMapClick = async (e) => { 
         const { lat, lng } = e.latlng;
         try {
             const response = await api.post('/optimize/nearest', { lat, lng });
