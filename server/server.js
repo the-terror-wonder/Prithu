@@ -1,22 +1,35 @@
 const express = require('express');
 const connectDB = require('./config/db');
 const cors = require('cors');
+const cookieParser = require('cookie-parser');
 require('dotenv').config();
 
 const app = express();
 
-// Connect to Database
 connectDB();
+const allowedOrigins = [
+    'http://localhost:5173', // Your local dev environment
+    'https://prithu.netlify.app' // Your live Netlify URL
+];
 
-// --- NEW, SIMPLIFIED CORS CONFIGURATION ---
-// This tells the server to accept requests from ANY origin.
-// This is the most reliable way to solve stubborn deployment CORS issues.
-app.use(cors());
-// --- END OF NEW CORS CONFIGURATION ---
+const corsOptions = {
+  origin: (origin, callback) => {
+    // Allow requests if the origin is in our list, or if there's no origin (like for server-to-server)
+    if (allowedOrigins.includes(origin) || !origin) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true, // This is the crucial line for cookies
+};
+
+app.use(cors(corsOptions));
+
 
 // Init Middleware
 app.use(express.json({ extended: false }));
-
+app.use(cookieParser());
 app.get('/api/health', (req, res) => res.status(200).json({ status: 'ok' }));
 // Define Routes
 app.use('/api/auth', require('./routes/authRoutes'));

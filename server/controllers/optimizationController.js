@@ -1,13 +1,13 @@
-console.log("--- Loading Optimization Controller ---");
-console.log("ORS API Key Found:", !!process.env.ORS_API_KEY);
-
 const axios = require('axios');
+
+// This confirms the file is being read
+console.log("SUCCESS: optimizationController.js has been loaded.");
 
 // --- HELPER FOR API CALLS ---
 const orsApi = axios.create({
     baseURL: 'https://api.openrouteservice.org',
     headers: {
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/json'
     }
 });
 
@@ -16,22 +16,20 @@ const calculateTotalDistance = (path, matrix) => {
     let distance = 0;
     for (let i = 0; i < path.length - 1; i++) {
         if (matrix[path[i]] && matrix[path[i]][path[i + 1]] !== undefined) {
-             distance += matrix[path[i]][path[i + 1]];
+            distance += matrix[path[i]][path[i + 1]];
         }
     }
     return distance;
 };
-
 const solveTspWith2Opt = (matrix) => {
     const numLocations = matrix.length;
     if (numLocations < 2) return [];
-
-    // 1. Get initial route using Nearest Neighbor
     let bestPath = [0];
     let visited = new Set(bestPath);
     let currentNode = 0;
     while (bestPath.length < numLocations) {
-        let nearestNode = -1, minDistance = Infinity;
+        let nearestNode = -1,
+            minDistance = Infinity;
         for (let i = 0; i < numLocations; i++) {
             if (!visited.has(i) && matrix[currentNode][i] < minDistance) {
                 minDistance = matrix[currentNode][i];
@@ -43,8 +41,6 @@ const solveTspWith2Opt = (matrix) => {
         visited.add(nearestNode);
         currentNode = nearestNode;
     }
-
-    // 2. Improve the route with 2-Opt
     let improvement = true;
     while (improvement) {
         improvement = false;
@@ -55,7 +51,6 @@ const solveTspWith2Opt = (matrix) => {
                 const segment = newPath.slice(i, j + 1);
                 segment.reverse();
                 const finalPath = newPath.slice(0, i).concat(segment).concat(newPath.slice(j + 1));
-                
                 const newDistance = calculateTotalDistance(finalPath, matrix);
                 if (newDistance < currentBestDistance) {
                     bestPath = finalPath;
@@ -68,64 +63,67 @@ const solveTspWith2Opt = (matrix) => {
     return bestPath;
 };
 
-
 // --- API-FACING CONTROLLERS ---
-
-// Replace the existing snapToRoad function with this one
 exports.snapToRoad = async (req, res) => {
-    const { lat, lng } = req.body;
+    const {
+        lat,
+        lng
+    } = req.body;
     try {
         const response = await orsApi.get(`/geocode/reverse?point.lon=${lng}&point.lat=${lat}&layers=street&sources=osm`, {
-            headers: { 'Authorization': process.env.ORS_API_KEY }
+            headers: {
+                'Authorization': process.env.ORS_API_KEY
+            }
         });
         if (response.data.features.length > 0) {
             const feature = response.data.features[0];
-            const snappedLocation = feature.geometry.coordinates; // This is [lng, lat]
+            const snappedLocation = feature.geometry.coordinates;
             const locationName = feature.properties.neighbourhood || feature.properties.name || feature.properties.label;
-
-            // Send a simple, clean object back
-            res.json({ 
-                location: snappedLocation, 
-                name: locationName 
+            res.json({
+                location: snappedLocation,
+                name: locationName
             });
         } else {
-            res.status(404).json({ msg: 'No match found' });
+            res.status(404).json({
+                msg: 'No match found'
+            });
         }
     } catch (error) {
         res.status(500).send('ORS geocode service failed');
     }
 };
-
 exports.optimizeRoute = async (req, res) => {
-    const { coordinates } = req.body;
-    if (coordinates.length < 2) {
-        return res.status(400).json({ msg: 'Need at least 2 coordinates' });
-    }
-    
+    const {
+        coordinates
+    } = req.body;
+    if (coordinates.length < 2) return res.status(400).json({
+        msg: 'Need at least 2 coordinates'
+    });
     const orsCoords = coordinates.map(c => [c[1], c[0]]);
-
     try {
-        const matrixResponse = await orsApi.post('/v2/matrix/driving-car', { locations: orsCoords, metrics: ["duration"] }, {
-            headers: { 'Authorization': process.env.ORS_API_KEY }
+        const matrixResponse = await orsApi.post('/v2/matrix/driving-car', {
+            locations: orsCoords,
+            metrics: ["duration"]
+        }, {
+            headers: {
+                'Authorization': process.env.ORS_API_KEY
+            }
         });
         const distanceMatrix = matrixResponse.data.durations;
-        
         const optimizedOrder = solveTspWith2Opt(distanceMatrix);
         const orderedCoordinates = optimizedOrder.map(index => orsCoords[index]);
-
-        const routeResponse = await orsApi.post('/v2/directions/driving-car/geojson', { coordinates: orderedCoordinates }, {
-            headers: { 'Authorization': process.env.ORS_API_KEY }
+        const routeResponse = await orsApi.post('/v2/directions/driving-car/geojson', {
+            coordinates: orderedCoordinates
+        }, {
+            headers: {
+                'Authorization': process.env.ORS_API_KEY
+            }
         });
-        
         const routeData = routeResponse.data.features[0];
-        const routeGeometry = routeData.geometry;
-        const routeSummary = routeData.properties.summary;
-        const routeSegments = routeData.properties.segments;
-        
-        res.json({ 
-            routeGeometry, 
-            routeSummary, 
-            routeSegments,
+        res.json({
+            routeGeometry: routeData.geometry,
+            routeSummary: routeData.properties.summary,
+            routeSegments: routeData.properties.segments,
             optimizedOrder
         });
     } catch (error) {
