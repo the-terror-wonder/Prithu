@@ -19,7 +19,7 @@ const RegisterPage = () => {
         password: formData.password,
       });
     //   localStorage.setItem("token", res.data.accessToken);
-      login();
+      login(res.data.user);
       navigate("/dashboard");
     } catch (err) {
       alert("User already exists");

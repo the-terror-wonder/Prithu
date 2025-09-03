@@ -4,11 +4,19 @@ import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import DashboardPage from './pages/DashboardPage';
 import LandingPage from './pages/LandingPage';
-import ProtectedRoute from './components/ProtectedRoute';
+// import ProtectedRoute from './components/ProtectedRoute';
+import { useAuth } from './context/AuthContext.jsx';
+
+const ProtectedRoute = ({ children }) => {
+    const { isAuthenticated, loading } = useAuth();
+    if (loading) return <div>Loading...</div>; // Or a spinner component
+    return isAuthenticated ? children : <Navigate to="/login" />;
+};
 
 const PublicRoute = ({ children }) => {
-    const token = localStorage.getItem('token');
-    return token ? <Navigate to="/dashboard" /> : children;
+    const { isAuthenticated, loading } = useAuth();
+    if (loading) return <div>Loading...</div>; // Or a spinner component
+    return isAuthenticated ? <Navigate to="/dashboard" /> : children;
 };
 
 function App() {

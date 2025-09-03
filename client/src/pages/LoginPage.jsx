@@ -15,14 +15,14 @@ const LoginPage = () => {
     e.preventDefault();
     setIsLoading(true);
     try {
-      await api.post('/auth/login', { username: formData.username, password: formData.password });
-      login(); // Set authenticated state
-      navigate('/dashboard');
+        const res = await api.post('/auth/login', formData);
+        login(res.data.user); // Pass the user data to the context
+        navigate('/dashboard');
     } catch (err) {
-      alert('Invalid Credentials');
-      setIsLoading(false);
+        alert('Invalid Credentials');
+        setIsLoading(false);
     }
-  };
+};
 
   return (
     <div className="min-h-screen w-full flex bg-slate-50 font-sans">

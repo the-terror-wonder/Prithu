@@ -1,26 +1,38 @@
-// client/src/context/AuthContext.jsx
-import React from 'react';
-import { createContext, useState, useContext } from 'react';
-
+import React, { createContext, useState, useContext, useEffect } from 'react';
+import api from '../services/api';
 
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
-    // We check for a simple flag in localStorage to remember the user across refreshes
-    const [isAuthenticated, setIsAuthenticated] = useState(!!localStorage.getItem('isAuthenticated'));
+    const [user, setUser] = useState(null);
+    const [loading, setLoading] = useState(true); // Start in a loading state
 
-    const login = () => {
-        localStorage.setItem('isAuthenticated', 'true');
-        setIsAuthenticated(true);
+    useEffect(() => {
+        const checkLoggedIn = async () => {
+            try {
+                // Ask the backend "who am I?"
+                const res = await api.get('/auth/me');
+                setUser(res.data); // If successful, save the user
+            } catch (err) {
+                // If the cookie is invalid or expired, this will fail
+                setUser(null);
+            } finally {
+                setLoading(false); // Stop loading once the check is complete
+            }
+        };
+        checkLoggedIn();
+    }, []);
+
+    const login = (userData) => {
+        setUser(userData);
     };
 
     const logout = () => {
-        localStorage.removeItem('isAuthenticated');
-        setIsAuthenticated(false);
+        setUser(null);
     };
 
     return (
-        <AuthContext.Provider value={{ isAuthenticated, login, logout }}>
+        <AuthContext.Provider value={{ isAuthenticated: !!user, user, login, logout, loading }}>
             {children}
         </AuthContext.Provider>
     );
@@ -28,4 +40,4 @@ export const AuthProvider = ({ children }) => {
 
 export const useAuth = () => {
     return useContext(AuthContext);
-};
+};  

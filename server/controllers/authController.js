@@ -9,8 +9,8 @@ const sendTokenCookie = (user, statusCode, res) => {
     const cookieOptions = {
         expires: new Date(Date.now() + 15 * 60 * 1000), // 15 minutes
         httpOnly: true, // Most important: Prevents JS access
-        secure: process.env.NODE_ENV === 'production', // Only send over HTTPS in production
-        sameSite: 'lax'
+        secure: true, // Only send over HTTPS in production
+        sameSite: 'none'
     };
 
     res.status(statusCode)
@@ -47,4 +47,19 @@ exports.logout = (req, res) => {
         httpOnly: true,
     });
     res.status(200).json({ success: true, message: 'User logged out successfully' });
+};
+
+// Add this function at the bottom of authController.js
+exports.checkUser = async (req, res) => {
+    // If the authMiddleware succeeds, req.user will be attached.
+    // We just need to find the full user details to send back.
+    try {
+        const user = await User.findById(req.user.id).select('-password');
+        if (!user) {
+            return res.status(404).json({ msg: 'User not found' });
+        }
+        res.json(user);
+    } catch (err) {
+        res.status(500).send('Server Error');
+    }
 };
