@@ -13,14 +13,7 @@ const allowedOrigins = [
 ];
 
 const corsOptions = {
-  origin: (origin, callback) => {
-    // Allow requests if the origin is in our list, or if there's no origin (like for server-to-server)
-    if (allowedOrigins.includes(origin) || !origin) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
+  origin: allowedOrigins,
   credentials: true, // This is the crucial line for cookies
 };
 
